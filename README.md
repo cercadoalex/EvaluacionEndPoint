@@ -11,9 +11,9 @@ Habilitar un End Point para cada Stored Procedure.
 
 ## Base Datos (SQL Server)
 
-Verificar el archivo BaseDatos.txt , el cual se encuentra los script de la base de datos el cual se debe ejecutar.
+Verificar el archivo BaseDatosEsquema.sql , el cual se encuentra los script de la base de datos el cual se debe ejecutar.
 ```sh
-Ruta:   EvaluacionQS\WebApi\Document\BaseDatos.txt
+Ruta:   EvaluacionQS\WebApi\Document\BaseDatosEsquema.sql
 ```
 
 ## Servicio Web Api (.Net Core)

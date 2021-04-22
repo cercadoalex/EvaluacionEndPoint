@@ -1,5 +1,8 @@
 ﻿
  
+
+ ---Fines Propios
+
 CREATE DATABASE PRUEBACSTI
 GO 
 
