@@ -1,4 +1,11 @@
 ﻿
+ 
+CREATE DATABASE PRUEBACSTI
+GO 
+
+USE  PRUEBACSTI
+GO
+
 CREATE TABLE Cliente (
 
 ClienteId int primary key identity(1,1),
