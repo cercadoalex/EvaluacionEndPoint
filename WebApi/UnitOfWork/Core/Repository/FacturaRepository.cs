@@ -18,18 +18,6 @@ namespace WebApi.UnitOfWork.Core.Repository
         }
 
 
-        //private void UpdateHeader(Invoice model, SqlConnection context)
-        //{
-
-        //    var query = "update  invoices set clientId=@clientId, Iva=@Iva, SubTotal=@SubTotal, Total=@Total where id=@id";
-        //    var command = new SqlCommand(query, context);
-        //    command.Parameters.AddWithValue("@ClientId", model.ClientId);
-        //    command.Parameters.AddWithValue("@Iva", model.Iva);
-        //    command.Parameters.AddWithValue("@Subtotal", model.Subtotal);
-        //    command.Parameters.AddWithValue("@Total", model.Total);
-        //    command.Parameters.AddWithValue("@id", model.Id);
-        //    command.ExecuteNonQuery();
-        //}
 
 
         private DataTable ListToDetalle(List<FacturaDetalle> detalles)
