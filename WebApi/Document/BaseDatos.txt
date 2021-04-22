@@ -1,0 +1,173 @@
+﻿
+CREATE TABLE Cliente (
+
+ClienteId int primary key identity(1,1),
+Nombres varchar(50) not null,
+Apellidos varchar(50) not null,
+Nic varchar(12) not null,
+Categoria char(1)
+)
+GO
+
+CREATE TABLE Producto (
+ProductoId int primary key identity(1,1),
+Descripcion varchar(50),
+PrecioUnitario decimal(18,5),
+Categoria char(2) 
+)
+GO
+
+CREATE TABLE Vendedor (
+VendedorId int primary key identity(1,1),
+Nombres varchar(50) not null,
+Apellidos varchar(50) not null,
+Dni char(8) not null,
+FechaIngreso date not null
+)
+GO
+
+
+CREATE TABLE DetalleFactura(
+DetalleFacturaId int primary key identity(1,1),
+FacturaId int not null,
+ProductoId int not null,
+Cantidad int not null ,
+PrecioUnitario decimal(18,5)
+)
+GO
+
+
+CREATE TABLE Factura (
+FacturaId int primary key identity(1,1),
+Serie varchar(3) not null,
+Codigo varchar(5) not null,
+VendedorId int not null,
+ClienteId int not null,
+Fecha date not null,
+Moneda char(3)
+)
+GO
+
+
+-- 1.	Crear un Stored Procedure que liste facturas emitidas por día ordenado 
+-- por el importe de mayor a menor, mostrar datos del cliente, del vendedor, y valor de la factura.
+
+create procedure sp_lista_facturas_emitidas
+as
+SELECT fc.Fecha,SUM(df.PrecioUnitario) as Importe,
+CONCAT(cl.Nombres,' ',cl.Apellidos) as Cliente,
+CONCAT(vd.Nombres,' ', vd.Apellidos) as Vendedor,
+fc.FacturaId
+FROM DetalleFactura df
+INNER JOIN Factura fc ON fc.FacturaId=df.FacturaId
+INNER JOIN Cliente cl ON cl.ClienteId=fc.ClienteId
+INNER JOIN Vendedor vd ON vd.VendedorId =fc.VendedorId
+GROUP BY fc.Fecha , CONCAT(cl.Nombres,' ',cl.Apellidos),
+CONCAT(vd.Nombres,' ', vd.Apellidos), fc.FacturaId
+ORDER BY Importe desc
+go
+
+-- 2.	Crear un Stored Procedure que liste los clientes de categoría ‘A’
+-- y que no tengan ninguna factura emitida.
+
+
+CREATE PROCEDURE sp_lista_cliente_factura_sin_emitir
+as 
+ SELECT s.*
+  FROM Cliente s
+  WHERE s.Categoria='A' and  NOT EXISTS (
+  SELECT * FROM Factura a 
+	WHERE s.ClienteId = a.ClienteId )
+	GO
+
+-- 3.	Crear un Stored Procedure que liste todos los productos.
+
+CREATE PROCEDURE sp_lista_productos
+as
+select * from  Producto (NOLOCK)
+GO
+
+-- 4.	Crear un Stored Procedure que liste los vendedores que ingresaron en el 2019.
+
+create procedure sp_vendedor_por_anio
+as 
+select * from  Vendedor where YEAR(FechaIngreso)='2019'
+go
+
+
+
+-- 5.	Crear un Stored Procedure que permita una registrar factura, validar que tenga como mínimo un producto,
+-- y que la cantidad de los productos será mayor a cero.
+
+
+CREATE TYPE DetalleFacturaTableTypeA AS TABLE
+(
+	[FacturaId] [int] NOT NULL,
+	[ProductoId] [int] NOT NULL,
+	[Cantidad] [int] NOT NULL,
+	[PrecioUnitario] [decimal](18, 5) NULL
+)
+Go
+
+
+
+
+
+CREATE PROCEDURE proc_insertar_factura
+@Serie  varchar(3)
+           ,@Codigo  varchar(5)
+           ,@VendedorId int
+           ,@ClienteId int
+           ,@Fecha date
+           ,@Moneda char(3)
+,@detalle DetalleFacturaTableTypeA READONLY
+AS
+BEGIN
+    declare @id int
+	declare @cantidad int
+	select @cantidad = count(ProductoId)
+	from @detalle
+
+	if @cantidad <= 0
+	begin
+	     PRINT N'ERROR: Ingrese Productos.';  
+                 RETURN 1;  
+	end
+
+	set @cantidad = 0
+
+	select  @cantidad = count(ProductoId)
+	from @detalle
+	where Cantidad <= 0
+
+	if @cantidad >= 1
+	begin
+	     PRINT N'ERROR: no puede tener cantidad en cero.';  
+                 RETURN 1;  
+	end
+
+	INSERT INTO [dbo].[Factura]
+           ([Serie]
+           ,[Codigo]
+           ,[VendedorId]
+           ,[ClienteId]
+           ,[Fecha]
+           ,[Moneda])
+     VALUES
+           (@Serie  
+           ,@Codigo 
+           ,@VendedorId 
+           ,@ClienteId 
+           ,@Fecha 
+           ,@Moneda)
+
+		   set @id = scope_identity()
+
+		   INSERT INTO [dbo].[DetalleFactura]
+           select 
+           @id
+           ,ProductoId
+           ,Cantidad 
+           ,PrecioUnitario 
+		   from @detalle
+END
