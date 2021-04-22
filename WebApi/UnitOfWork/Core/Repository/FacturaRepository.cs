@@ -19,23 +19,19 @@ namespace WebApi.UnitOfWork.Core.Repository
 
 
 
-
         private DataTable ListToDetalle(List<FacturaDetalle> detalles)
         {
             var table = new DataTable();
 
-            //table.Columns.Add("DetalleFacturaId", typeof(int));
             table.Columns.Add("FacturaId", typeof(int));
             table.Columns.Add("ProductoId", typeof(int));
             table.Columns.Add("Cantidad", typeof(int));
             table.Columns.Add("PrecioUnitario", typeof(decimal));
 
-            int count = 0;
             foreach (var item in detalles)
             {
                 var row = table.NewRow();
-                //row["DetalleFacturaId"] = ++count;
-                row["FacturaId"] = 0;
+                row["FacturaId"] = item.FacturaId;
                 row["ProductoId"] = item.ProductoId;
                 row["Cantidad"] = item.Cantidad;
                 row["PrecioUnitario"] = item.PrecioUnitario;
